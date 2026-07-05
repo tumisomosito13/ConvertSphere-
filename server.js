@@ -1,22 +1,22 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+// Serve static files
+app.use(express.static(__dirname));
+
+// Homepage
 app.get("/", (req, res) => {
-  res.json({
-    app: "ConvertSphere API",
-    status: "Online",
-    message: "Welcome to ConvertSphere Backend!",
-    version: "1.0.0"
-  });
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`ConvertSphere API running on port ${PORT}`);
+  console.log(`ConvertSphere running on port ${PORT}`);
 });
