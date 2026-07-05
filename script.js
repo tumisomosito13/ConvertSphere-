@@ -5,65 +5,58 @@ console.log("ConvertSphere is running!");
 // Theme button
 const themeBtn = document.querySelector(".theme");
 
-themeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("light-mode");
+if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+        document.body.classList.toggle("light-mode");
 
-    if (document.body.classList.contains("light-mode")) {
-        themeBtn.textContent = "☀️";
-    } else {
-        themeBtn.textContent = "🌙";
-    }
-});
+        if (document.body.classList.contains("light-mode")) {
+            themeBtn.textContent = "☀️";
+        } else {
+            themeBtn.textContent = "🌙";
+        }
+    });
+}
 
-// File upload
-const fileInput = document.querySelector('input[type="file"]');
+// File selection
+const fileInput = document.getElementById("videoFile");
 
-fileInput.addEventListener("change", () => {
-    if (fileInput.files.length > 0) {
-        alert("Selected file: " + fileInput.files[0].name);
-    }
-});
+if (fileInput) {
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+            alert("Selected file: " + fileInput.files[0].name);
+        }
+    });
+}
 
-// Convert button
-const convertBtn = document.querySelector(".convert-btn");
+// Upload video
+async function uploadVideo() {
+    const fileInput = document.getElementById("videoFile");
+    const status = document.getElementById("uploadStatus");
 
-convertBtn.addEventListener("click", () => {
-    if (fileInput.files.length === 0) {
-        alert("Please choose a file first.");
+    if (!fileInput || fileInput.files.length === 0) {
+        status.innerHTML = "Please choose a video first.";
         return;
     }
 
-    alert("Conversion feature coming soon!");
-});
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
 
-async function uploadVideo() {
-  const fileInput = document.getElementById("videoFile");
-  const status = document.getElementById("uploadStatus");
+    status.innerHTML = "Uploading...";
 
-  if (fileInput.files.length === 0) {
-    status.innerHTML = "Please choose a video first.";
-    return;
-  }
+    try {
+        const response = await fetch(CONFIG.API_URL + "/upload", {
+            method: "POST",
+            body: formData
+        });
 
-  const formData = new FormData();
-  formData.append("file", fileInput.files[0]);
+        const data = await response.json();
 
-  status.innerHTML = "Uploading...";
-
-  try {
-    const response = await fetch(CONFIG.API_URL + "/upload", {
-      method: "POST",
-      body: formData
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      status.innerHTML = "✅ " + data.message;
-    } else {
-      status.innerHTML = "❌ " + data.message;
-    }
-  } catch (error) {
-    status.innerHTML = "❌ Upload failed. Please try again.";
-  }
+        if (data.success) {
+            status.innerHTML = "✅ File uploaded successfully!";
+        } else {
+            status.innerHTML = "❌ " + data.message;
         }
+    } catch (error) {
+        status.innerHTML = "❌ Upload failed. Please try again.";
+    }
+}
