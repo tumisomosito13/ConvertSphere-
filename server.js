@@ -1,31 +1,29 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const multer = require("multer");
-const { exec } = require("child_process");
 const fs = require("fs");
+const multer = require("multer");
+const ffmpeg = require("fluent-ffmpeg");
 
 const app = express();
 
-// Create uploads folder automatically
+app.use(cors());
+app.use(express.json());
+app.use(express.static(__dirname));
+
+// Create folders if they don't exist
 if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads");
 }
 
-app.use(cors());
-app.use(express.json());
+if (!fs.existsSync("converted")) {
+    fs.mkdirSync("converted");
+}
 
-// Serve static files
-app.use(express.static(__dirname));
-
-// Upload folder
+// Multer storage
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
+    destination: (req, file, cb) => cb(null, "uploads/"),
+    filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
 });
 
 const upload = multer({ storage });
@@ -35,8 +33,9 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Upload API
-app.post("/upload", upload.single("file"), (req, res) => {
+// MP4 → MP3 Conversion
+app.post("/convert/mp4-to-mp3", upload.single("file"), (req, res) => {
+
     if (!req.file) {
         return res.status(400).json({
             success: false,
@@ -44,28 +43,22 @@ app.post("/upload", upload.single("file"), (req, res) => {
         });
     }
 
-    res.json({
-        success: true,
-        message: "File uploaded successfully!",
-        filename: req.file.filename
-    });
-});
+    const input = req.file.path;
+    const output = `converted/${Date.now()}.mp3`;
 
-// FFmpeg Test
-app.get("/ffmpeg-test", (req, res) => {
-    exec("ffmpeg -version", (error, stdout, stderr) => {
-        if (error) {
-            return res.json({
-                installed: false,
-                error: stderr || error.message
+    ffmpeg(input)
+        .toFormat("mp3")
+        .on("end", () => {
+            res.download(output);
+        })
+        .on("error", (err) => {
+            res.status(500).json({
+                success: false,
+                error: err.message
             });
-        }
+        })
+        .save(output);
 
-        res.json({
-            installed: true,
-            version: stdout
-        });
-    });
 });
 
 const PORT = process.env.PORT || 3000;
