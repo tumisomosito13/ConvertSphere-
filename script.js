@@ -35,3 +35,35 @@ convertBtn.addEventListener("click", () => {
 
     alert("Conversion feature coming soon!");
 });
+
+async function uploadVideo() {
+  const fileInput = document.getElementById("videoFile");
+  const status = document.getElementById("uploadStatus");
+
+  if (fileInput.files.length === 0) {
+    status.innerHTML = "Please choose a video first.";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  status.innerHTML = "Uploading...";
+
+  try {
+    const response = await fetch(CONFIG.API_URL + "/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      status.innerHTML = "✅ " + data.message;
+    } else {
+      status.innerHTML = "❌ " + data.message;
+    }
+  } catch (error) {
+    status.innerHTML = "❌ Upload failed. Please try again.";
+  }
+        }
