@@ -5,58 +5,33 @@ console.log("ConvertSphere is running!");
 // Theme button
 const themeBtn = document.querySelector(".theme");
 
-if (themeBtn) {
-    themeBtn.addEventListener("click", () => {
-        document.body.classList.toggle("light-mode");
+themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("light-mode");
 
-        if (document.body.classList.contains("light-mode")) {
-            themeBtn.textContent = "☀️";
-        } else {
-            themeBtn.textContent = "🌙";
-        }
-    });
-}
+    if (document.body.classList.contains("light-mode")) {
+        themeBtn.textContent = "☀️";
+    } else {
+        themeBtn.textContent = "🌙";
+    }
+});
 
-// File selection
-const fileInput = document.getElementById("videoFile");
+// File upload
+const fileInput = document.querySelector('input[type="file"]');
 
-if (fileInput) {
-    fileInput.addEventListener("change", () => {
-        if (fileInput.files.length > 0) {
-            alert("Selected file: " + fileInput.files[0].name);
-        }
-    });
-}
+fileInput.addEventListener("change", () => {
+    if (fileInput.files.length > 0) {
+        alert("Selected file: " + fileInput.files[0].name);
+    }
+});
 
-// Upload video
-async function uploadVideo() {
-    const fileInput = document.getElementById("videoFile");
-    const status = document.getElementById("uploadStatus");
+// Convert button
+const convertBtn = document.querySelector(".convert-btn");
 
-    if (!fileInput || fileInput.files.length === 0) {
-        status.innerHTML = "Please choose a video first.";
+convertBtn.addEventListener("click", () => {
+    if (fileInput.files.length === 0) {
+        alert("Please choose a file first.");
         return;
     }
 
-    const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
-
-    status.innerHTML = "Uploading...";
-
-    try {
-        const response = await fetch(CONFIG.API_URL + "/upload", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            status.innerHTML = "✅ File uploaded successfully!";
-        } else {
-            status.innerHTML = "❌ " + data.message;
-        }
-    } catch (error) {
-        status.innerHTML = "❌ Upload failed. Please try again.";
-    }
-}
+    alert("Conversion feature coming soon!");
+});
